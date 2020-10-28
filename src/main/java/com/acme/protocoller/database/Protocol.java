@@ -4,14 +4,14 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Protocol")
+@Table(name = "protocol")
 public class Protocol {
 
     @EmbeddedId
-    @Column(name = "EntryId", updatable = false)
+    @Column(name = "entry_Id", updatable = false)
     private EntryId id;
 
-    @Column(name = "Temperature", updatable = false)
+    @Column(name = "temperature", updatable = false)
     private double temperature;
 
 

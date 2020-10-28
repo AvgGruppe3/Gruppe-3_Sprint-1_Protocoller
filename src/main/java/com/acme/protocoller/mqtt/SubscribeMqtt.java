@@ -11,13 +11,17 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 
-@PropertySource("classpath:mqtt.properties")
+@PropertySource("classpath:application.properties")
 @Component
 public class SubscribeMqtt {
     private final Logger logger = LoggerFactory.getLogger(SubscribeMqtt.class);
 
     @Value("${mqtt.broker.uri}")
     private String uri;
+    @Value("${mqtt.username}")
+    private String username;
+    @Value("${mqtt.password}")
+    private String password;
 
     private final MqttCallbackImpl mqttCallbackImpl;
 
@@ -29,8 +33,8 @@ public class SubscribeMqtt {
         MqttAsyncClient myClient = new MqttAsyncClient(uri, "protocoller");
         MqttConnectOptions options = new MqttConnectOptions();
         options.setCleanSession(false);
-        options.setUserName("username");
-        options.setPassword("password".toCharArray());
+        options.setUserName(username);
+        options.setPassword(password.toCharArray());
 
         myClient.setCallback(mqttCallbackImpl);
 
