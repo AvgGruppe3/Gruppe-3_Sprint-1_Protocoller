@@ -1,7 +1,6 @@
 package com.acme.protocoller.mqtt;
 
 import com.acme.protocoller.database.Protocol;
-import com.acme.Sensor;
 import com.acme.protocoller.database.ProtocolRepository;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -12,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Component
 public class MqttCallbackImpl implements MqttCallback {
@@ -21,8 +22,6 @@ public class MqttCallbackImpl implements MqttCallback {
 
     @Autowired
     public MqttCallbackImpl(ProtocolRepository protocolRepository) {
-
-
         this.protocolRepository = protocolRepository;
     }
 
@@ -32,31 +31,22 @@ public class MqttCallbackImpl implements MqttCallback {
     }
 
     @Override
-    public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
-        //Auto-generated method stub
-    }
-
-    @Override
-    public void messageArrived(String topic, MqttMessage mqttMessage, Protocol protocol) {
+    public void messageArrived(String topic, MqttMessage mqttMessage)  {
         String temperatureString = new String(mqttMessage.getPayload(), StandardCharsets.UTF_8);
         logger.info(topic + ": " + temperatureString);
         try {
             double temperatureValue = Double.parseDouble(temperatureString);
-            Sensor sensor = Sensor.getSensorByMqttTopic(topic);
-            sensor.temperature = temperatureValue;
-
-            if(System.currentTimeMillis() >= (sensor.timestampEmail + 60000)) {
-                if (temperatureValue > 25) {
-                    protocol.setTopic(topic);
-                    protocol.setTemperature(temperatureValue);
-                    protocol.setTime(sensor.timestampEmail);
-                    protocolRepository.save(protocol);
-                }
-
-            }
+            Protocol protocol = new Protocol(topic, temperatureValue, LocalDateTime.now());
+            protocolRepository.save(protocol);
         }catch (NumberFormatException e){
             logger.info("sent message is not a number: {}", mqttMessage );
         }
 
     }
+
+    @Override
+    public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+        //Auto-generated method stub
+    }
+
 }

@@ -18,6 +18,11 @@ public class Protocol {
     @Column(name = "Date", updatable = false)
     private LocalDateTime time;
 
+    public Protocol(String topic, double temperature, LocalDateTime time) {
+        this.topic = topic;
+        this.temperature = temperature;
+        this.time = time;
+    }
 
     public String getTopic() {
         return topic;
