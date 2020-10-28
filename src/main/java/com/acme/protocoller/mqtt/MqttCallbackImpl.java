@@ -1,8 +1,8 @@
 package com.acme.protocoller.mqtt;
 
-import com.acme.Database.DatabaseService;
+import com.acme.protocoller.database.Protocol;
 import com.acme.Sensor;
-import com.acme.email.EmailService;
+import com.acme.protocoller.database.ProtocolRepository;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -17,13 +17,13 @@ import java.nio.charset.StandardCharsets;
 public class MqttCallbackImpl implements MqttCallback {
     private final Logger logger = LoggerFactory.getLogger(MqttCallbackImpl.class);
 
-    private final DatabaseService databaseService;
+    private final ProtocolRepository protocolRepository;
 
     @Autowired
-    public MqttCallbackImpl(DatabaseService databaseService) {
+    public MqttCallbackImpl(ProtocolRepository protocolRepository) {
 
 
-        this.databaseService = databaseService;
+        this.protocolRepository = protocolRepository;
     }
 
     @Override
@@ -37,24 +37,23 @@ public class MqttCallbackImpl implements MqttCallback {
     }
 
     @Override
-    public void messageArrived(String topic, MqttMessage mqttMessage) {
+    public void messageArrived(String topic, MqttMessage mqttMessage,Protocol protocol) {
         String temperatureString = new String(mqttMessage.getPayload(), StandardCharsets.UTF_8);
         logger.info(topic + ": " + temperatureString);
         try {
             double temperatureValue = Double.parseDouble(temperatureString);
-
             Sensor sensor = Sensor.getSensorByMqttTopic(topic);
             sensor.temperature = temperatureValue;
-            if(System.currentTimeMillis() >= (sensor.timestampEmail + 60000)) {
-                if (temperatureValue > 35) {
-                    emailService.sendEmail(sensor, "Alarm");
-                    //Aufruf dazu Datenbank protokollieren (temperatur + zeit)
-                } else if (temperatureValue > 25) {
-                    emailService.sendEmail(sensor, "Warnung");
-                    //Aufruf dazu Datenbank protokollieren (temperatur + zeit)
-                }
-            }
 
+            if(System.currentTimeMillis() >= (sensor.timestampEmail + 60000)) {
+                if (temperatureValue > 25) {
+                    protocol.setTopic(sensor.topic);
+                    protocol.setTemperature(temperatureValue);
+                    protocol.setTime(sensor.timestampEmail);
+                    protocolRepository.save(protocol);
+                }
+
+            }
         }catch (NumberFormatException e){
             logger.info("sent message is not a number: {}", mqttMessage );
         }
