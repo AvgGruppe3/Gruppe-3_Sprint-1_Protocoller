@@ -37,7 +37,7 @@ public class MqttCallbackImpl implements MqttCallback {
     }
 
     @Override
-    public void messageArrived(String topic, MqttMessage mqttMessage,Protocol protocol) {
+    public void messageArrived(String topic, MqttMessage mqttMessage, Protocol protocol) {
         String temperatureString = new String(mqttMessage.getPayload(), StandardCharsets.UTF_8);
         logger.info(topic + ": " + temperatureString);
         try {
@@ -47,7 +47,7 @@ public class MqttCallbackImpl implements MqttCallback {
 
             if(System.currentTimeMillis() >= (sensor.timestampEmail + 60000)) {
                 if (temperatureValue > 25) {
-                    protocol.setTopic(sensor.topic);
+                    protocol.setTopic(topic);
                     protocol.setTemperature(temperatureValue);
                     protocol.setTime(sensor.timestampEmail);
                     protocolRepository.save(protocol);
