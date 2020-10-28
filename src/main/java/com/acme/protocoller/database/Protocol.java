@@ -7,40 +7,28 @@ import java.time.LocalDateTime;
 @Table(name = "Protocol")
 public class Protocol {
 
-    @Id
-    @Column(name = "Topic", updatable = false)
-    private String topic;
+    @EmbeddedId
+    @Column(name = "EntryId")
+    private EntryId id;
 
     @Column(name = "Temperature", updatable = false)
     private double temperature;
 
-    @Id
-    @Column(name = "Date", updatable = false)
-    private LocalDateTime time;
 
-    public Protocol(String topic, double temperature, LocalDateTime time) {
-        this.topic = topic;
+    public Protocol(EntryId id, double temperature) {
+        this.id =id;
         this.temperature = temperature;
-        this.time = time;
+
     }
 
-    public String getTopic() {
-        return topic;
-    }
-    public void setTopic(String topic) {
-        this.topic = topic;
+    public Protocol() {
+
     }
     public double getTemperature() {
         return temperature;
     }
     public void setTemperature(double temperature) {
         this.temperature = temperature;
-    }
-    public LocalDateTime getTime() {
-        return time;
-    }
-    public void setTime(LocalDateTime time) {
-        this.time = time;
     }
 
 }

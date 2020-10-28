@@ -2,6 +2,7 @@ package com.acme.protocoller.mqtt;
 
 import com.acme.protocoller.database.Protocol;
 import com.acme.protocoller.database.ProtocolRepository;
+import com.acme.protocoller.database.EntryId;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
@@ -35,9 +36,13 @@ public class MqttCallbackImpl implements MqttCallback {
         String temperatureString = new String(mqttMessage.getPayload(), StandardCharsets.UTF_8);
         logger.info(topic + ": " + temperatureString);
         try {
+
             double temperatureValue = Double.parseDouble(temperatureString);
-            Protocol protocol = new Protocol(topic, temperatureValue, LocalDateTime.now());
-            protocolRepository.save(protocol);
+            if(temperatureValue >= 25) {
+                EntryId id = new EntryId(topic, LocalDateTime.now());
+                Protocol protocol = new Protocol(id,temperatureValue);
+                protocolRepository.save(protocol);
+            }
         }catch (NumberFormatException e){
             logger.info("sent message is not a number: {}", mqttMessage );
         }
