@@ -8,8 +8,7 @@ import java.time.LocalDateTime;
 public class Protocol {
 
     @EmbeddedId
-    @Column(name = "entry_Id", updatable = false)
-    private EntryId id;
+    EntryId id;
 
     @Column(name = "temperature", updatable = false)
     private double temperature;
@@ -20,7 +19,6 @@ public class Protocol {
         this.temperature = temperature;
 
     }
-
     public Protocol() {
 
     }
