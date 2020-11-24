@@ -36,7 +36,9 @@ public class MqttCallbackImpl implements MqttCallback {
         String temperatureString = new String(mqttMessage.getPayload(), StandardCharsets.UTF_8);
         logger.info(topic + ": " + temperatureString);
         try {
-
+            if(temperatureString.contains(",")){
+                temperatureString = temperatureString.replace(",", ".");
+            }
             double temperatureValue = Double.parseDouble(temperatureString);
             if(temperatureValue >= 25) {
                 EntryId id = new EntryId(topic, LocalDateTime.now());
